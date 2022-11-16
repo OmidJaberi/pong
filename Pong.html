@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Pong</title>
+	<style type="text/css">
+		* {
+			padding: 0;
+			margin: 0;
+		}
+		body {
+			overflow: hidden;
+		}
+		.scores {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-around;
+			font-size: 10vw;
+			font-family: "arial";
+		}
+		canvas {
+			position: fixed;
+			top: 0;
+			left: 0;
+		}
+	</style>
+</head>
+<body>
+	<div class="scores"><div id="left">0</div><div id="right">0</div></div>
+	<canvas id="myCanvas"></canvas>
+	<script>
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+
+	var displayWidth = window.innerWidth;
+	var displayHeight = window.innerHeight;
+	var scale = 2;
+	canvas.style.width = displayWidth + 'px';
+	canvas.style.height = displayHeight + 'px';
+	canvas.width = displayWidth * scale;
+	canvas.height = displayHeight * scale;
+
+	let width = canvas.width;
+	let height = canvas.height;
+	let left = document.getElementById('left');
+	let right = document.getElementById('right');
+
+	class Rocket {
+		static arr = [];
+		static width = 0.008;
+		static height = 0.2;
+		static speed = 0.005;
+		static safeTime = 200;
+		static AISpeed = 200; //Eeasy: 300 / Medium: 200 / Hard: 100
+		constructor(p, ai = false) {
+			this.p = p;
+			this.x = (p == "l" ? 0.1 : 0.9) - (Rocket.width / 2);
+			this.y = 0.5 - (Rocket.height / 2);
+			Rocket.arr.push(this);
+			this.interval = null;
+			this.safe = false;
+			if (ai) {
+				let play = setInterval(() => {
+					this.stop();
+					if (ball.y < this.y + (Rocket.height / 2))
+						this.move(-1);
+					if (ball.y > this.y + (Rocket.height / 2))
+						this.move(+1);
+				}, Rocket.AISpeed)
+			}
+		}
+		draw() {
+			ctx.fillStyle = "#000000";
+			ctx.fillRect(this.x * width, this.y * height, Rocket.width * width, Rocket.height * height);
+		}
+		move(dir) {
+			if (this.interval)
+				return;
+			this.interval = setInterval(() => {
+				this.y += dir * Rocket.speed;
+				if (this.y < 0)
+					this.y = 0;
+				if (this.y > 1 - Rocket.height)
+					this.y = 1 - Rocket.height;
+			}, 10)
+		}
+		stop() {
+			clearInterval(this.interval);
+			this.interval = null;
+		}
+		touch(x, y, r) {
+			if (this.safe || ball.phased)
+				return false;
+			let dx = width * Math.max(this.x - x, 0, x - (this.x + Rocket.width));
+			let dy = height * Math.max(this.y - y, 0, y - (this.y + Rocket.height));
+			let t = Math.sqrt(dx * dx + dy * dy) < r;
+			if (t) {
+				this.safe = true;
+				let x = setTimeout(() => {this.safe = false}, Rocket.safeTime);
+			}
+			return t;
+		}
+	}
+
+	class Ball {
+		static radius = 0.02;
+		static speed = 0.015;
+		constructor(x = 0.5, y = 0.02, dx = 1, dy = 1) {
+			this.x = x;
+			this.y = y;
+			this.dx = dx;
+			this.dy = dy;
+			this.phased = false;
+			this.interval = setInterval(() => {
+				this.x += this.dx * Ball.speed;
+				this.y += this.dy * Ball.speed;
+				if (this.x >= 1) {
+					left.innerHTML ++;
+					this.dx *= -1;
+					this.phase();
+				}
+				if (this.x <= 0) {
+					right.innerHTML ++;
+					this.dx *= -1;
+					this.phase();
+				}
+				if (this.y + Ball.radius >= 1 || this.y - Ball.radius <= 0) {
+					this.dy *= -1;
+				}
+				for (let i = 0; i < Rocket.arr.length; i++) {
+					if (Rocket.arr[i].touch(this.x, this.y, Ball.radius * height))
+						this.dx *= -1;
+				}
+			}, 30);
+		}
+		phase() {
+			this.phased = true;
+			let i = setTimeout(() => {this.phased = false;}, 1000);
+		}
+		draw() {
+			ctx.beginPath();
+			ctx.arc(this.x * width, this.y * height, Ball.radius * height, 0, 2 * Math.PI);
+			ctx.fillStyle = "#000000";
+			if (this.phased)
+				ctx.fillStyle = "#FF0000";
+			ctx.fill();
+		}
+	}
+
+	function midLine(n = 10) {
+		let x = 2 * n + 1;
+		ctx.fillStyle = "#000000";
+		for (let i = 0; i < x; i++)
+			if (i % 2 == 1)
+				ctx.fillRect(0.497 * width, i * (height / x), 0.006 * width, height / x);
+	}
+
+	function draw() {
+		ctx.clearRect(0, 0, width, height);
+		midLine();
+		rocket1.draw();
+		rocket2.draw();
+		ball.draw();
+	}
+
+	//--Initialize--
+
+	const rocket1 = new Rocket('l', true);
+	const rocket2 = new Rocket('r', false);
+	const ball = new Ball();
+	const interval = setInterval(draw, 30);
+
+	//--Event Handling--
+
+	document.onkeydown = (event) => {
+		if (event.key == 'w')
+			rocket1.move(-1);
+		if (event.key == 's')
+			rocket1.move(1);
+		if (event.key == 'ArrowUp')
+			rocket2.move(-1);
+		if (event.key == 'ArrowDown')
+			rocket2.move(1);
+	}
+	document.onkeyup = (event) => {
+		if (event.key == 'w' || event.key == 's')
+			rocket1.stop();
+		if (event.key == 'ArrowUp' || event.key == 'ArrowDown')
+			rocket2.stop();
+	}
+	</script>
+</body>
+</html>
