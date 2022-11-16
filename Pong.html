@@ -21,6 +21,7 @@
 		}
 		canvas {
 			position: fixed;
+			cursor: none;
 			top: 0;
 			left: 0;
 		}
@@ -30,29 +31,28 @@
 	<div class="scores"><div id="left">0</div><div id="right">0</div></div>
 	<canvas id="myCanvas"></canvas>
 	<script>
-	var canvas = document.getElementById("myCanvas");
-	var ctx = canvas.getContext("2d");
-
-	var displayWidth = window.innerWidth;
-	var displayHeight = window.innerHeight;
-	var scale = 2;
-	canvas.style.width = displayWidth + 'px';
-	canvas.style.height = displayHeight + 'px';
-	canvas.width = displayWidth * scale;
-	canvas.height = displayHeight * scale;
-
-	let width = canvas.width;
-	let height = canvas.height;
 	let left = document.getElementById('left');
 	let right = document.getElementById('right');
+	let canvas = document.getElementById("myCanvas");
+	let ctx = canvas.getContext("2d");
+
+	let width;
+	let height;
+
+	let rocket1;
+	let rocket2;
+	let ball;
+	let interval;
+
+	let control = 'keyboard';
 
 	class Rocket {
 		static arr = [];
 		static width = 0.008;
 		static height = 0.2;
-		static speed = 0.005;
+		static speed = 0.007;
 		static safeTime = 200;
-		static AISpeed = 200; //Eeasy: 300 / Medium: 200 / Hard: 100
+		static AISpeed = 60; //Eeasy: 300 / Medium: 200 / Hard: 100
 		constructor(p, ai = false) {
 			this.p = p;
 			this.x = (p == "l" ? 0.1 : 0.9) - (Rocket.width / 2);
@@ -63,10 +63,20 @@
 			if (ai) {
 				let play = setInterval(() => {
 					this.stop();
-					if (ball.y < this.y + (Rocket.height / 2))
-						this.move(-1);
-					if (ball.y > this.y + (Rocket.height / 2))
-						this.move(+1);
+					if ((this.p == 'l' && ball.dx == 1) || (this.p == 'r' && ball.dx == -1)) {
+						if (0.47 > this.y + (Rocket.height / 2))
+							this.move(+1);
+						else if (0.53 < this.y + (Rocket.height / 2))
+							this.move(-1);
+						else
+							this.stop();
+					}
+					else {
+						if (ball.y < this.y + (Rocket.height / 2))
+							this.move(-1);
+						if (ball.y > this.y + (Rocket.height / 2))
+							this.move(+1);
+					}
 				}, Rocket.AISpeed)
 			}
 		}
@@ -105,7 +115,7 @@
 
 	class Ball {
 		static radius = 0.02;
-		static speed = 0.015;
+		static speed = 0.02;
 		constructor(x = 0.5, y = 0.02, dx = 1, dy = 1) {
 			this.x = x;
 			this.y = y;
@@ -148,6 +158,27 @@
 		}
 	}
 
+	function resize() {
+		let displayWidth = window.innerWidth;
+		let displayHeight = window.innerHeight;
+		let scale = 2;
+		canvas.style.width = displayWidth + 'px';
+		canvas.style.height = displayHeight + 'px';
+		canvas.width = displayWidth * scale;
+		canvas.height = displayHeight * scale;
+
+		width = canvas.width;
+		height = canvas.height;
+	}
+
+	function initialize() {
+		resize();
+		rocket1 = new Rocket('l', true);
+		rocket2 = new Rocket('r', false);
+		ball = new Ball();
+		interval = setInterval(draw, 30);
+	}
+
 	function midLine(n = 10) {
 		let x = 2 * n + 1;
 		ctx.fillStyle = "#000000";
@@ -164,13 +195,6 @@
 		ball.draw();
 	}
 
-	//--Initialize--
-
-	const rocket1 = new Rocket('l', true);
-	const rocket2 = new Rocket('r', false);
-	const ball = new Ball();
-	const interval = setInterval(draw, 30);
-
 	//--Event Handling--
 
 	document.onkeydown = (event) => {
@@ -178,17 +202,27 @@
 			rocket1.move(-1);
 		if (event.key == 's')
 			rocket1.move(1);
-		if (event.key == 'ArrowUp')
-			rocket2.move(-1);
-		if (event.key == 'ArrowDown')
-			rocket2.move(1);
+		if (control == 'keyboard') {
+			if (event.key == 'ArrowUp')
+				rocket2.move(-1);
+			if (event.key == 'ArrowDown')
+				rocket2.move(1);
+		}
 	}
+	
 	document.onkeyup = (event) => {
 		if (event.key == 'w' || event.key == 's')
 			rocket1.stop();
-		if (event.key == 'ArrowUp' || event.key == 'ArrowDown')
+		if (control == 'keyboard' && (event.key == 'ArrowUp' || event.key == 'ArrowDown'))
 			rocket2.stop();
 	}
+	
+	document.onmousemove = (event) => {
+		if (control == 'mouse')
+			rocket2.y = (2 * event.pageY / height) - Rocket.height / 2;
+	}
+	window.onresize = event => {resize()};
+	initialize();
 	</script>
 </body>
 </html>
