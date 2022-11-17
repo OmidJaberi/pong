@@ -23,6 +23,9 @@
 			height: 100vh;
 			z-index: 1000;
 		}
+		.controller {
+			z-index: 990;
+		}
 		button {
 			width: 25vw;
 			height: 8vw;
@@ -31,6 +34,10 @@
 			font-family: "arial";
 			font-size: 2vw;
 			font-weight: bold;
+		}
+		button:hover {
+			background: black;
+			color: white;
 		}
 		.scores {
 			display: flex;
@@ -60,6 +67,10 @@
 		<button onclick="run(0)">Auto Play!</button>
 		<button onclick="run(1)">One Player</button>
 		<button onclick="run(2)">Two Players</button>
+	</div>
+	<div class="panel controller" id="panel2">
+		<button onclick="setController('mouse')">Mouse</button>
+		<button onclick="setController('keyboard')">Keyboard</button>
 	</div>
 	<div class="scores"><div id="left">0</div><div id="right">0</div></div>
 	<canvas id="myCanvas"></canvas>
@@ -253,6 +264,7 @@
 		if (x == 0) {
 			rocket1.ai = true;
 			rocket2.ai = true;
+			document.getElementById('panel2').style.display = 'none';
 		}
 		else if (x == 1) {
 			rocket1.ai = true;
@@ -261,9 +273,15 @@
 		else if (x == 2) {
 			rocket1.ai = false;
 			rocket2.ai = false;
+			document.getElementById('panel2').style.display = 'none';
 		}
 		document.getElementById('panel').style.display = 'none';
 		pause();
+	}
+
+	function setController(x) {
+		control = x;
+		document.getElementById('panel2').style.display = 'none';
 	}
 
 	//--Event Handling--
