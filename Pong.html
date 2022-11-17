@@ -12,12 +12,32 @@
 		body {
 			overflow: hidden;
 		}
+		.panel {
+			position: fixed;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-evenly;
+			background: white;
+			width: 100vw;
+			height: 100vh;
+			z-index: 1000;
+		}
+		button {
+			width: 25vw;
+			height: 8vw;
+			border: 0.5vw solid black;
+			background: white;
+			font-family: "arial";
+			font-size: 2vw;
+			font-weight: bold;
+		}
 		.scores {
 			display: flex;
 			flex-direction: row;
 			justify-content: space-around;
-			font-size: 10vw;
 			font-family: "arial";
+			font-size: 10vw;
 		}
 		canvas {
 			position: fixed;
@@ -25,11 +45,25 @@
 			top: 0;
 			left: 0;
 		}
+		.paused {
+			position: fixed;
+			bottom: 1vw;
+			left: 1vw;
+			font-family: "arial";
+			font-size: 2vw;
+			font-weight: bold;
+		}
 	</style>
 </head>
 <body>
+	<div class="panel" id="panel">
+		<button onclick="run(0)">Auto Play!</button>
+		<button onclick="run(1)">One Player</button>
+		<button onclick="run(2)">Two Players</button>
+	</div>
 	<div class="scores"><div id="left">0</div><div id="right">0</div></div>
 	<canvas id="myCanvas"></canvas>
+	<div class="paused" id="paused">Pong is paused, press space to continue...</div>
 	<script>
 	let left = document.getElementById('left');
 	let right = document.getElementById('right');
@@ -60,25 +94,26 @@
 			Rocket.arr.push(this);
 			this.interval = null;
 			this.safe = false;
-			if (ai) {
-				let play = setInterval(() => {
-					this.stop();
-					if ((this.p == 'l' && ball.dx == 1) || (this.p == 'r' && ball.dx == -1)) {
-						if (0.47 > this.y + (Rocket.height / 2))
-							this.move(+1);
-						else if (0.53 < this.y + (Rocket.height / 2))
-							this.move(-1);
-						else
-							this.stop();
-					}
-					else {
-						if (ball.y < this.y + (Rocket.height / 2))
-							this.move(-1);
-						if (ball.y > this.y + (Rocket.height / 2))
-							this.move(+1);
-					}
-				}, Rocket.AISpeed)
-			}
+			this.ai = ai;
+			let play = setInterval(() => {
+				if (!this.ai)
+					return;
+				this.stop();
+				if ((this.p == 'l' && ball.dx == 1) || (this.p == 'r' && ball.dx == -1)) {
+					if (0.47 > this.y + (Rocket.height / 2))
+						this.move(+1);
+					else if (0.53 < this.y + (Rocket.height / 2))
+						this.move(-1);
+					else
+						this.stop();
+				}
+				else {
+					if (ball.y < this.y + (Rocket.height / 2))
+						this.move(-1);
+					if (ball.y > this.y + (Rocket.height / 2))
+						this.move(+1);
+				}
+			}, Rocket.AISpeed)
 		}
 		draw() {
 			ctx.fillStyle = "#000000";
@@ -187,29 +222,53 @@
 
 		width = canvas.width;
 		height = canvas.height;
-	}
-
-	function initialize() {
-		resize();
-		rocket1 = new Rocket('l', true);
-		rocket2 = new Rocket('r', false);
-		ball = new Ball();
 		draw();
 	}
 
+	function initialize() {
+		rocket1 = new Rocket('l');
+		rocket2 = new Rocket('r');
+		ball = new Ball();
+		resize();
+	}
+
 	function pause() {
+		if (document.getElementById('panel').style.display != 'none')
+			return;
 		play = !play;
 		if (interval) {
 			clearInterval(interval);
 			interval = null;
+			document.getElementById('paused').style.display = "block";
+			canvas.style.cursor = "default";
 		}
-		else
+		else {
 			interval = setInterval(draw, 30);
+			document.getElementById('paused').style.display = "none";
+			canvas.style.cursor = "none";
+		}
+	}
+
+	function run(x) {
+		if (x == 0) {
+			rocket1.ai = true;
+			rocket2.ai = true;
+		}
+		else if (x == 1) {
+			rocket1.ai = true;
+			rocket2.ai = false;
+		}
+		else if (x == 2) {
+			rocket1.ai = false;
+			rocket2.ai = false;
+		}
+		document.getElementById('panel').style.display = 'none';
+		pause();
 	}
 
 	//--Event Handling--
 	document.onkeydown = (event) => {
-		if (event.key == 'p')
+		if (event.key == ' ')
 			pause();
 		if (event.key == 'w')
 			rocket1.move(-1);
@@ -234,7 +293,7 @@
 		if (control == 'mouse')
 			rocket2.y = (2 * event.pageY / height) - Rocket.height / 2;
 	}
-	window.onresize = event => {respize()};
+	window.onresize = event => {resize()};
 	initialize();
 	</script>
 </body>
