@@ -81,16 +81,6 @@
 	let canvas = document.getElementById("myCanvas");
 	let ctx = canvas.getContext("2d");
 
-	let width;
-	let height;
-
-	let rocket1;
-	let rocket2;
-	let ball;
-	let interval = null;
-	let play = false;
-	let control = 'keyboard';
-
 	class Rocket {
 		static arr = [];
 		static width = 0.008;
@@ -206,6 +196,16 @@
 		}
 	}
 
+	let width;
+	let height;
+
+	let rocket1 = new Rocket('l');
+	let rocket2 = new Rocket('r');
+	let ball = new Ball();
+	let interval = null;
+	let play = false;
+	let control = 'keyboard';
+
 	function midLine(n = 10) {
 		let x = 2 * n + 1;
 		ctx.fillStyle = "#000000";
@@ -234,13 +234,6 @@
 		width = canvas.width;
 		height = canvas.height;
 		draw();
-	}
-
-	function initialize() {
-		rocket1 = new Rocket('l');
-		rocket2 = new Rocket('r');
-		ball = new Ball();
-		resize();
 	}
 
 	function pause() {
@@ -312,7 +305,7 @@
 			rocket2.y = (2 * event.pageY / height) - Rocket.height / 2;
 	}
 	window.onresize = event => {resize()};
-	initialize();
+	resize();
 	</script>
 </body>
 </html>
