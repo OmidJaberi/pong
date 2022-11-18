@@ -151,18 +151,20 @@
 
 	class Ball {
 		static radius = 0.02;
-		static speed = 0.02;
+		static speed = 0.015;
+		static acceleration = 0.0004;
 		constructor(x = 0.5, y = 0.02, dx = 1, dy = 1) {
 			this.x = x;
 			this.y = y;
 			this.dx = dx;
 			this.dy = dy;
+			this.speed = Ball.speed;
 			this.phased = false;
 			this.interval = setInterval(() => {
 				if (!play)
 					return;
-				this.x += this.dx * Ball.speed;
-				this.y += this.dy * Ball.speed;
+				this.x += this.dx * this.speed;
+				this.y += this.dy * this.speed;
 				if (this.x >= 1) {
 					left.innerHTML ++;
 					this.dx *= -1;
@@ -177,8 +179,10 @@
 					this.dy *= -1;
 				}
 				for (let i = 0; i < Rocket.arr.length; i++) {
-					if (Rocket.arr[i].touch(this.x, this.y, Ball.radius * height))
+					if (Rocket.arr[i].touch(this.x, this.y, Ball.radius * height)) {
+						this.speed += Ball.acceleration;
 						this.dx *= -1;
+					}
 				}
 			}, 30);
 		}
@@ -192,6 +196,7 @@
 		}
 		spawn() {
 			this. x = 0.5;
+			this.speed = Ball.speed;
 		}
 	}
 
