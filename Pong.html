@@ -166,12 +166,12 @@
 				if (this.x >= 1) {
 					left.innerHTML ++;
 					this.dx *= -1;
-					this.phase();
+					this.spawn();
 				}
 				if (this.x <= 0) {
 					right.innerHTML ++;
 					this.dx *= -1;
-					this.phase();
+					this.spawn();
 				}
 				if (this.y + Ball.radius >= 1 || this.y - Ball.radius <= 0) {
 					this.dy *= -1;
@@ -182,10 +182,6 @@
 				}
 			}, 30);
 		}
-		phase() {
-			this.phased = true;
-			let i = setTimeout(() => {this.phased = false;}, 1000);
-		}
 		draw() {
 			ctx.beginPath();
 			ctx.arc(this.x * width, this.y * height, Ball.radius * height, 0, 2 * Math.PI);
@@ -193,6 +189,9 @@
 			if (this.phased)
 				ctx.fillStyle = "#FF0000";
 			ctx.fill();
+		}
+		spawn() {
+			this. x = 0.5;
 		}
 	}
 
