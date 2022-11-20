@@ -139,7 +139,7 @@
 			this.interval = null;
 		}
 		touch(x, y, r) {
-			if (this.safe || ball.phased)
+			if (this.safe)
 				return false;
 			let dx = width * Math.max(this.x - x, 0, x - (this.x + Rocket.width));
 			let dy = height * Math.max(this.y - y, 0, y - (this.y + Rocket.height));
@@ -162,7 +162,6 @@
 			this.dx = dx;
 			this.dy = dy;
 			this.speed = Ball.speed;
-			this.phased = false;
 			this.interval = setInterval(() => {
 				if (!play)
 					return;
@@ -199,8 +198,6 @@
 			ctx.beginPath();
 			ctx.arc(this.x * width, this.y * height, Ball.radius * height, 0, 2 * Math.PI);
 			ctx.fillStyle = "#000000";
-			if (this.phased)
-				ctx.fillStyle = "#FF0000";
 			ctx.fill();
 		}
 		spawn() {
