@@ -60,6 +60,18 @@
 			font-size: 2vw;
 			font-weight: bold;
 		}
+		.paused button {
+			position: fixed;
+			left: 40vw;
+			top: 40vh;
+			width: 20vw;
+			height: 20vh;
+			border: 0;
+			font-size: 5vw;
+		}
+		.paused button:hover {
+			background: black;
+		}
 	</style>
 </head>
 <body>
@@ -74,7 +86,7 @@
 	</div>
 	<div class="scores"><div id="left">0</div><div id="right">0</div></div>
 	<canvas id="myCanvas"></canvas>
-	<div class="paused" id="paused">Pong is paused, press space to continue...</div>
+	<div class="paused" id="paused">Pong is paused, press space to continue...<button onclick="reset()">Reset</button></div>
 	<script>
 	let left = document.getElementById('left');
 	let right = document.getElementById('right');
@@ -94,7 +106,7 @@
 			Rocket.arr.push(this);
 			this.interval = null;
 			this.ai = ai;
-			let play = setInterval(() => {
+			this.play = setInterval(() => {
 				if (!this.ai)
 					return;
 				this.stop();
@@ -273,6 +285,24 @@
 		pause();
 	}
 
+	function reset() {
+		play = false;
+		rocket1.ai = false;
+		rocket1.y = 0.5 - (Rocket.height / 2);
+		rocket2.ai = false;
+		rocket2.y = 0.5 - (Rocket.height / 2);
+		control = 'keyboard';
+
+		ball.y = 0.4;
+		ball.spawn(1, 0);
+
+		left.innerHTML = 0;
+		right.innerHTML = 0;
+		document.getElementById('panel').style.display = 'flex';
+		document.getElementById('panel2').style.display = 'flex';
+		draw();
+	}
+
 	//--Event Handling--
 	document.onkeydown = (event) => {
 		if (event.key == ' ')
@@ -302,7 +332,7 @@
 	}
 
 	window.onresize = event => {resize()};
-	
+
 	resize();
 	</script>
 </body>
