@@ -91,6 +91,7 @@
 		constructor(p, ai = false) {
 			this.p = p;
 			this.x = (p == "l" ? 0.1 : 0.9) - (Rocket.width / 2);
+			this.orientation = (p == "l" ? 1 : -1);
 			this.y = 0.5 - (Rocket.height / 2);
 			Rocket.arr.push(this);
 			this.interval = null;
@@ -100,7 +101,7 @@
 				if (!this.ai)
 					return;
 				this.stop();
-				if ((this.p == 'l' && ball.dx == 1) || (this.p == 'r' && ball.dx == -1)) {
+				if ((this.p == 'l' && ball.dx > 0) || (this.p == 'r' && ball.dx < 0)) {
 					if (0.47 > this.y + (Rocket.height / 2))
 						this.move(+1);
 					else if (0.53 < this.y + (Rocket.height / 2))
@@ -109,9 +110,11 @@
 						this.stop();
 				}
 				else {
-					if (ball.y < this.y + (Rocket.height / 2))
+					if (ball.y > this.y + (1 * Rocket.height / 3) && ball.y < this.y + (2 * Rocket.height / 3))
+						this.stop();
+					else if (ball.y < this.y + (Rocket.height / 2))
 						this.move(-1);
-					if (ball.y > this.y + (Rocket.height / 2))
+					else if (ball.y > this.y + (Rocket.height / 2))
 						this.move(+1);
 				}
 			}, Rocket.AISpeed)
@@ -151,9 +154,9 @@
 
 	class Ball {
 		static radius = 0.02;
-		static speed = 0.015;
+		static speed = 0.020;
 		static acceleration = 0.0004;
-		constructor(x = 0.5, y = 0.02, dx = 1, dy = 1) {
+		constructor(x = 0.5, y = 0.4, dx = 1, dy = 0) {
 			this.x = x;
 			this.y = y;
 			this.dx = dx;
@@ -175,13 +178,19 @@
 					this.dx *= -1;
 					this.spawn();
 				}
-				if (this.y + Ball.radius >= 1 || this.y - Ball.radius <= 0) {
+				if (this.y + Ball.radius >= 1 && this.dy > 0) {
+					this.dy *= -1;
+				}
+				if (this.y - Ball.radius <= 0 && this.dy < 0) {
 					this.dy *= -1;
 				}
 				for (let i = 0; i < Rocket.arr.length; i++) {
 					if (Rocket.arr[i].touch(this.x, this.y, Ball.radius * height)) {
 						this.speed += Ball.acceleration;
-						this.dx *= -1;
+						let angle = (2 * Math.PI / 3) * (this.y - (Rocket.arr[i].y + (Rocket.height / 2))) / Rocket.height;
+						console.log(angle / Math.PI, "PI");
+						this.dy = Math.sin(angle);
+						this.dx = Math.cos(angle) * Rocket.arr[i].orientation;
 					}
 				}
 			}, 30);
