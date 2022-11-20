@@ -81,7 +81,7 @@
 		<button onclick="run(2)">Two Players</button>
 	</div>
 	<div class="panel controller" id="panel2">
-		<button onclick="setController('mouse')">Mouse</button>
+		<button onclick="setController('mouse')">Mouse / Touch</button>
 		<button onclick="setController('keyboard')">Keyboard</button>
 	</div>
 	<div class="scores"><div id="left">0</div><div id="right">0</div></div>
@@ -328,6 +328,11 @@
 	document.onmousemove = (event) => {
 		if (control == 'mouse')
 			rocket2.y = (2 * event.pageY / height) - Rocket.height / 2;
+	}
+
+	document.ontouchmove = (event) => {
+		if (control == 'mouse')
+			rocket2.y = (2 * event.touches[0].clientY / height) - Rocket.height / 2;
 	}
 
 	window.onresize = event => {resize()};
