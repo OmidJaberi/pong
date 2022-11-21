@@ -333,6 +333,24 @@
 	document.ontouchmove = (event) => {
 		if (control == 'mouse')
 			rocket2.y = (2 * event.touches[0].clientY / height) - Rocket.height / 2;
+		else if (!rocket2.ai && !rocket1.ai) {
+			if (event.touches[1]) {
+				let y1 = (2 * event.touches[0].clientY / height) - Rocket.height / 2;
+				let y2 = (2 * event.touches[1].clientY / height) - Rocket.height / 2;
+				if (event.touches[0].clientX > event.touches[1].clientX) {
+					let swap = y1;
+					y1 = y2;
+					y2 = swap;
+				}
+				rocket1.y = y1;
+				rocket2.y = y2;
+			}
+			else if (event.touches[0].clientX < (width / 4))
+				rocket1.y = (2 * event.touches[0].clientY / height) - Rocket.height / 2;
+			else
+				rocket2.y = (2 * event.touches[0].clientY / height) - Rocket.height / 2;
+
+		}
 	}
 
 	window.onresize = event => {resize()};
