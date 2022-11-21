@@ -87,7 +87,7 @@
 	</div>
 	<div class="scores"><div id="left">0</div><div id="right">0</div></div>
 	<canvas id="myCanvas"></canvas>
-	<div class="paused" id="paused">Pong is paused, press space to continue...<button onclick="reset()">Reset</button></div>
+	<div class="paused" id="paused">Press space or double tap on the screen to play...<button onclick="reset()">Reset</button></div>
 	<script>
 	let left = document.getElementById('left');
 	let right = document.getElementById('right');
@@ -329,6 +329,14 @@
 	document.onmousemove = (event) => {
 		if (control == 'mouse')
 			rocket2.y = (2 * event.pageY / height) - Rocket.height / 2;
+	}
+
+	let doubleTap = false;
+	document.ontouchend = () => {
+		if (doubleTap)
+			pause();
+		doubleTap = true;
+		let t = setTimeout(() => { doubleTap = false }, 500);
 	}
 
 	document.ontouchmove = (event) => {
